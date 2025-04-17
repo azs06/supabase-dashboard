@@ -4,13 +4,13 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase-client"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Upload, X } from "lucide-react"
+import { sendSms } from "@/app/actions/send-sms"
 
 export function SendSmsForm() {
   const [phoneNumbers, setPhoneNumbers] = useState("")
@@ -18,7 +18,6 @@ export function SendSmsForm() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClient()
 
   const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -48,7 +47,7 @@ export function SendSmsForm() {
     setLoading(true)
 
     try {
-      // Validate and clean phone numbers
+      // Parse and clean phone numbers
       const numbersArray = phoneNumbers
         .split(",")
         .map((num) => num.trim())
@@ -62,27 +61,11 @@ export function SendSmsForm() {
         throw new Error("Please enter a message")
       }
 
-      // In a real app, you would integrate with an SMS API here
-      // For this example, we'll just save to the database
+      // Call our server action to send the SMS
+      const result = await sendSms(numbersArray, message)
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        throw new Error("User not authenticated")
-      }
-
-      const { error } = await supabase.from("messages").insert({
-        user_id: user.id,
-        content: message,
-        recipients: numbersArray.length,
-        phone_numbers: numbersArray,
-        status: "sent", // In a real app, this would be updated based on the SMS API response
-      })
-
-      if (error) {
-        throw error
+      if (!result.success) {
+        throw new Error(result.message)
       }
 
       toast({
