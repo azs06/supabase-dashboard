@@ -46,7 +46,7 @@ export async function sendSms(phoneNumbers: string[], message: string): Promise<
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${smsGatewayToken}`,
+        TOKEN: `${smsGatewayToken}`,
       },
       body: JSON.stringify(payload),
     })
