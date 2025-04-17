@@ -63,8 +63,10 @@ export default async function DashboardLayout({
 
     return (
       <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-        <DashboardSidebar userRole={profile.role} />
-        <div className="flex-1 overflow-auto">
+        <div className="w-64 fixed inset-y-0 left-0 z-30">
+          <DashboardSidebar userRole={profile.role} />
+        </div>
+        <div className="flex-1 ml-64">
           <main className="p-6">{children}</main>
         </div>
       </div>
